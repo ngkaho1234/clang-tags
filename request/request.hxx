@@ -337,7 +337,7 @@ namespace Request {
 
     virtual void set (const Json::Value & json) {
       destination_.resize (json.size());
-      for (int i = 0 ; i<json.size() ; ++i) {
+      for (unsigned i = 0 ; i<json.size() ; ++i) {
         setValue (json[i], destination_[i]);
       }
     }
