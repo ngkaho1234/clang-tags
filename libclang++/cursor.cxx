@@ -34,6 +34,10 @@ namespace LibClang {
     return clang_isDeclaration(clang_getCursorKind(raw()));
   }
 
+  bool Cursor::isDefinition () const {
+    return clang_isCursorDefinition(raw());
+  }
+
   Cursor Cursor::referenced () const {
     return clang_getCursorReferenced (raw());
   }

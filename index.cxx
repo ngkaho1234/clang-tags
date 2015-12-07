@@ -67,7 +67,7 @@ public:
       storage_.addTag (usr, cursor.kindStr(), cursor.spelling(), fileName,
                        begin.line, begin.column, begin.offset,
                        end.line,   end.column,   end.offset,
-                       cursor.isDeclaration());
+                       cursor.isDeclaration(), cursor.isDefinition());
     }
 
     return CXChildVisit_Recurse;

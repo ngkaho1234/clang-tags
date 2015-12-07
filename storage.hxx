@@ -39,7 +39,8 @@ public:
                  "  line2    INTEGER,"
                  "  col2     INTEGER,"
                  "  offset2  INTEGER,"
-                 "  isDecl   BOOLEAN"
+                 "  isDecl   BOOLEAN,"
+                 "  isDefn   BOOLEAN"
                  ")");
     db_.execute ("CREATE TABLE IF NOT EXISTS options ( "
                  "  name   TEXT, "
@@ -220,7 +221,8 @@ public:
                const std::string & fileName,
                const int line1, const int col1, const int offset1,
                const int line2, const int col2, const int offset2,
-               bool isDeclaration) {
+               bool isDeclaration,
+               bool isDefinition) {
     int fileId = fileId_ (fileName);
     if (fileId == -1) {
       return;
@@ -234,11 +236,11 @@ public:
                    "  AND offset2=?")
       .bind (fileId).bind (usr).bind (offset1).bind (offset2);
     if (stmt.step() == SQLITE_DONE) { // no matching row
-      db_.prepare ("INSERT INTO tags VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+      db_.prepare ("INSERT INTO tags VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(fileId) .bind(usr)  .bind(kind)    .bind(spelling)
         .bind(line1)  .bind(col1) .bind(offset1)
         .bind(line2)  .bind(col2) .bind(offset2)
-        .bind(isDeclaration)
+        .bind(isDeclaration) .bind(isDefinition)
         .step();
     }
   }

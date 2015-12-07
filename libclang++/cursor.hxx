@@ -73,6 +73,12 @@ namespace LibClang {
      */
     bool isDeclaration () const;
 
+    /** @brief Determine whether the cursor represents a definition
+     *
+     * @return true if the cursor represents a definition
+     */
+    bool isDefinition () const;
+
     /** @brief Get the cursor referenced
      *
      * For cursors which represent references to other entities in the AST,
