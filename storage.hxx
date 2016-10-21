@@ -42,9 +42,15 @@ public:
                  "  isDecl   BOOLEAN,"
                  "  isDefn   BOOLEAN"
                  ")");
-    db_.execute ("CREATE TABLE IF NOT EXISTS options ( "
-                 "  name   TEXT, "
-                 "  value  TEXT "
+    db_.execute ("CREATE TABLE IF NOT EXISTS options ("
+                 "  name   TEXT,"
+                 "  value  TEXT"
+                 ")");
+    db_.execute ("CREATE INDEX IF NOT EXISTS idx_tags_spelling ON tags ("
+                 "  spelling"
+                 ")");
+    db_.execute ("CREATE INDEX IF NOT EXISTS idx_tags_usr ON tags ("
+                 "  usr"
                  ")");
   }
 
