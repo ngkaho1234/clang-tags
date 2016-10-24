@@ -32,6 +32,7 @@ public:
 
   struct IndexArgs {
     std::vector<std::string> exclude;
+    std::vector<std::string> fileNames;
     bool                     diagnostics;
   };
   void index (IndexArgs & args, std::ostream & cout);
