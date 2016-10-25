@@ -46,6 +46,10 @@ public:
     add (key ("diagnostics", args_.diagnostics)
          ->metavar ("true|false")
          ->description ("Print compilation diagnostics"));
+
+    add (key ("filenames", args_.fileNames)
+         ->metavar ("FILEPATHS")
+         ->description ("Paths to source files"));
   }
 
   void defaults () {
