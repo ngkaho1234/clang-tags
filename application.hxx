@@ -27,7 +27,8 @@ public:
   struct CompilationDatabaseArgs {
     std::string fileName;
   };
-  void compilationDatabase (CompilationDatabaseArgs & args, std::ostream & cout);
+  void compilationDatabaseLoad (CompilationDatabaseArgs & args, std::ostream & cout);
+  void compilationDatabaseDrop (CompilationDatabaseArgs & args, std::ostream & cout);
 
 
   struct IndexArgs {

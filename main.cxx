@@ -7,7 +7,7 @@
 class CompilationDatabaseCommand : public Request::CommandParser {
 public:
   CompilationDatabaseCommand (const std::string & name, Application & application)
-    : Request::CommandParser (name, "Read a compilation database"),
+    : Request::CommandParser (name, "Read and load commands given in a compilation database"),
       application_ (application)
   {
     prompt_ = "load> ";
@@ -16,20 +16,46 @@ public:
     using Request::key;
     add (key ("database", args_.fileName)
          ->metavar ("FILEPATH")
-         ->description ("Load compilation commands from a JSON compilation database"));
+         ->description ("Path to a JSON compilation database"));
   }
 
   void defaults () {
     args_.fileName = "compile_commands.json";
   }
 
-  void run (std::ostream & cout) {
-    application_.compilationDatabase (args_, cout);
-  }
-
-private:
+protected:
   Application & application_;
   Application::CompilationDatabaseArgs args_;
+};
+
+
+class CompilationDatabaseLoadCommand : public CompilationDatabaseCommand {
+public:
+  CompilationDatabaseLoadCommand (const std::string & name, Application & application)
+    : CompilationDatabaseCommand (name, application)
+  {
+    setDescription ("Read and load commands given in a compilation database");
+    prompt_ = "load> ";
+  }
+
+  void run (std::ostream & cout) {
+    application_.compilationDatabaseLoad (args_, cout);
+  }
+};
+
+
+class CompilationDatabaseDropCommand : public CompilationDatabaseCommand {
+public:
+  CompilationDatabaseDropCommand (const std::string & name, Application & application)
+    : CompilationDatabaseCommand (name, application)
+  {
+    setDescription ("Read and drop commands given in a compilation database");
+    prompt_ = "drop> ";
+  }
+
+  void run (std::ostream & cout) {
+    application_.compilationDatabaseDrop (args_, cout);
+  }
 };
 
 
@@ -254,7 +280,8 @@ int main (int argc, char **argv) {
   Storage storage;
   Application app (storage, cacheLimit);
   Request::Parser p ("Clang-tags server\n");
-  p .add (new CompilationDatabaseCommand ("load", app))
+  p .add (new CompilationDatabaseLoadCommand ("load", app))
+    .add (new CompilationDatabaseDropCommand ("drop", app))
     .add (new IndexCommand ("index", app))
     .add (new UpdateCommand ("update", app))
     .add (new FindCommand ("find", app))
