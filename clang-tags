@@ -249,16 +249,20 @@ def index (args):
     """Index the source code base."""
 
     exclude = [os.path.realpath(d) for d in args.exclude]
+    filenames = args.filenames
 
     request = {"command": "index",
-               "exclude": exclude}
+               "exclude": exclude,
+               "filenames": filenames}
     return sendRequest (request)
 
 
 def update (args):
     """Update the source code base index."""
 
-    request = {"command": "update"}
+    filenames = args.filenames
+    request = {"command": "update",
+               "filenames": filenames}
     return sendRequest (request)
 
 
@@ -466,6 +470,12 @@ def main_argparse ():
         dest = "exclude",
         action = "store_const", const = [],
         help = "reset exclude list")
+    s.add_argument (
+        "filenames",
+        metavar = "FILEPATHS",
+        nargs = argparse.REMAINDER,
+        help = "file names of source files to be indexed. If this argument is skipped, "
+        "all the files in the database will be indexed")
     s.set_defaults (exclude = ["/usr"])
     s.set_defaults (fun = index)
 
@@ -475,6 +485,12 @@ def main_argparse ():
         help = "update index",
         description = "Update the source code base index, using the same"
         " arguments as previous call to `index'")
+    s.add_argument (
+        "filenames",
+        metavar = "FILEPATHS",
+        nargs = argparse.REMAINDER,
+        help = "file names of source files to have their index be updated. If this argument is skipped, "
+        "all the files' index in the database will be update")
     s.set_defaults (fun = update)
 
 
