@@ -395,8 +395,6 @@ public:
     std::string ret;
     if (stmt.step() == SQLITE_ROW) {
       stmt >> ret;
-    } else {
-      throw std::runtime_error ("No stored value for option: `" + name + "'");
     }
 
     return ret;
@@ -451,7 +449,7 @@ private:
     Json::Value json;
     Json::Reader reader;
     if (! reader.parse (s, json)) {
-      throw std::runtime_error (reader.getFormattedErrorMessages());
+      return;
     }
 
     for (unsigned int i=0 ; i<json.size() ; ++i) {
