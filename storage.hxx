@@ -50,7 +50,9 @@ public:
                  "  spelling"
                  ")");
     db_.execute ("CREATE INDEX IF NOT EXISTS idx_tags_usr ON tags ("
-                 "  usr"
+                 "  usr,"
+                 "  isDecl,"
+                 "  isDefn"
                  ")");
   }
 
@@ -325,6 +327,7 @@ public:
                    "INNER JOIN tags AS def ON def.usr = ref.usr "
                    "INNER JOIN files AS defFile ON def.fileId = defFile.id "
                    "WHERE def.isDecl = 1 "
+                   "  AND def.isDefn = 1 "
                    "  AND ref.fileId = ?  "
                    "  AND ref.offset1 <= ? "
                    "  AND ref.offset2 >= ? "
