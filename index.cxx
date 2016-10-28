@@ -95,9 +95,12 @@ void Application::index (IndexArgs & args, std::ostream & cout) {
 void Application::update (IndexArgs & args, std::ostream & cout) {
   cout << std::endl
        << "-- Updating index" << std::endl;
-  args.exclude = storage_.getOption ("exclude", Storage::Vector());
-
-  updateIndex_ (args, cout);
+  try {
+    args.exclude = storage_.getOption ("exclude", Storage::Vector());
+    updateIndex_ (args, cout);
+  } catch (std::runtime_error& e) {
+    std::cerr << "Warning: " << e.what() << std::endl;
+  }
 }
 
 void Application::updateIndex_ (IndexArgs & args, std::ostream & cout) {
@@ -137,24 +140,28 @@ void Application::updateIndex_ (IndexArgs & args, std::ostream & cout) {
              << "  parsing..." << std::flush;
         Timer timer;
 
-        LibClang::TranslationUnit tu = translationUnit_(fileName);
+        try {
+          LibClang::TranslationUnit tu = translationUnit_(fileName);
 
-        cout << "\t" << timer.get() << "s." << std::endl;
-        timer.reset();
+          cout << "\t" << timer.get() << "s." << std::endl;
+          timer.reset();
 
-        // Print clang diagnostics if requested
-        if (args.diagnostics) {
-          for (unsigned int N = tu.numDiagnostics(),
-                 i = 0 ; i < N ; ++i) {
-            cout << tu.diagnostic (i) << std::endl << std::endl;
+          // Print clang diagnostics if requested
+          if (args.diagnostics) {
+            for (unsigned int N = tu.numDiagnostics(),
+                   i = 0 ; i < N ; ++i) {
+              cout << tu.diagnostic (i) << std::endl << std::endl;
+            }
           }
-        }
 
-        cout << "  indexing..." << std::endl;
-        LibClang::Cursor top (tu);
-        Indexer indexer (fileName, args.exclude, storage_, cout);
-        indexer.visitChildren (top);
-        cout << "  indexing...\t" << timer.get() << "s." << std::endl;
+          cout << "  indexing..." << std::endl;
+          LibClang::Cursor top (tu);
+          Indexer indexer (fileName, args.exclude, storage_, cout);
+          indexer.visitChildren (top);
+          cout << "  indexing...\t" << timer.get() << "s." << std::endl;
+        } catch (std::runtime_error& e) {
+          std::cerr << "Error: " << e.what() << std::endl;
+        }
       }
     }
   }

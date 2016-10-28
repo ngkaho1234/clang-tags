@@ -216,19 +216,24 @@ void printCompletionResult(LibClang::CompletionResult completionResult,
 }
 
 void Application::complete (CompleteArgs & args, std::ostream & cout) {
-  LibClang::TranslationUnit & tu = translationUnit_ (args.fileName);
+  try {
+    LibClang::TranslationUnit & tu = translationUnit_ (args.fileName);
 
-  CXCodeCompleteResults * results
-    = clang_codeCompleteAt(tu.raw(),
-                           args.fileName.c_str(), args.line, args.column,
-                           0, 0,
-                           clang_defaultCodeCompleteOptions());
-  LibClang::CodeCompletions completions (results);
-  completions.sort();
+    CXCodeCompleteResults * results
+      = clang_codeCompleteAt(tu.raw(),
+                             args.fileName.c_str(), args.line, args.column,
+                             0, 0,
+                             clang_defaultCodeCompleteOptions());
+    LibClang::CodeCompletions completions (results);
+    completions.sort();
 
-  cout << std::endl;
+    cout << std::endl;
 
-  int n = completions.size();
-  for (int i = 0 ; i != n ; ++i)
-    printCompletionResult (completions[i], cout);
+    int n = completions.size();
+    for (int i = 0 ; i != n ; ++i)
+      printCompletionResult (completions[i], cout);
+
+  } catch (std::runtime_error& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
 }

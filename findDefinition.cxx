@@ -131,28 +131,32 @@ void Application::findDefinitionFromIndex_ (FindDefinitionArgs & args, std::ostr
 void Application::findDefinitionFromSource_ (FindDefinitionArgs & args, std::ostream & cout) {
   std::string directory;
   std::vector<std::string> clArgs;
-  storage_.getCompileCommand (args.fileName, directory, clArgs);
+  try {
+    storage_.getCompileCommand (args.fileName, directory, clArgs);
 
-  LibClang::Index index;
-  LibClang::TranslationUnit tu = index.parse (clArgs);
+    LibClang::Index index;
+    LibClang::TranslationUnit tu = index.parse (clArgs);
 
-  // Print clang diagnostics if requested
-  if (args.diagnostics) {
-    for (unsigned int N = tu.numDiagnostics(),
-           i = 0 ; i < N ; ++i) {
-      cout << tu.diagnostic (i) << std::endl << std::endl;
+    // Print clang diagnostics if requested
+    if (args.diagnostics) {
+      for (unsigned int N = tu.numDiagnostics(),
+             i = 0 ; i < N ; ++i) {
+        cout << tu.diagnostic (i) << std::endl << std::endl;
+      }
     }
-  }
 
-  // Print cursor definition
-  LibClang::Cursor cursor (tu, args.fileName.c_str(), args.offset);
-  if (args.mostSpecific) {
-    displayCursor (cursor, cout);
-  }
-  else {
-    LibClang::SourceLocation target = cursor.location();
-    FindDefinition findDef (target, cout);
-    findDef.visitChildren (tu.cursor());
+    // Print cursor definition
+    LibClang::Cursor cursor (tu, args.fileName.c_str(), args.offset);
+    if (args.mostSpecific) {
+      displayCursor (cursor, cout);
+    }
+    else {
+      LibClang::SourceLocation target = cursor.location();
+      FindDefinition findDef (target, cout);
+      findDef.visitChildren (tu.cursor());
+    }
+  } catch (std::runtime_error& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
   }
 }
 
