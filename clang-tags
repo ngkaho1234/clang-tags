@@ -316,6 +316,32 @@ def findDefinition (args):
 
     return sendRequest (request, processOutput)
 
+
+def findDefinitionBySpelling (args):
+    """Find the definition of an identifier."""
+    spelling = args.spelling
+
+    request = {"command":   "find-spelling",
+               "spelling": spelling}
+
+    def processOutput (line):
+        try:
+            refDef = json.loads (line)
+            refDef["def"]["file"] = os.path.relpath (refDef["def"]["file"])
+            refDef["def"]["col2"] -= 1
+
+            sys.stdout.write ("-- %(substring)s -- %(kind)s %(spelling)s\n" % refDef["def"])
+            sys.stdout.write ("   %(file)s:%(line1)d-%(line2)d:%(col1)d-%(col2)d:"
+                              " %(spelling)s\n"
+                              % refDef["def"])
+            sys.stdout.write ("   USR: %(usr)s\n" % refDef["def"])
+            sys.stdout.write ("\n")
+        except:
+            sys.stdout.write (line)
+
+    return sendRequest (request, processOutput)
+
+
 
 def grep (args):
     """Find all references to a symbol."""
@@ -561,6 +587,18 @@ def main_argparse ():
         help = "recompile the file to find the definition")
     s.set_defaults (fromIndex = True)
     s.set_defaults (fun = findDefinition)
+
+
+    s = subparsers.add_parser (
+        "find-spelling",
+        help = "find the definition of an identifier in a source file by spelling provided",
+        description = "Find the definition location of an identifier in a"
+        " source file.")
+    s.add_argument (
+        "spelling",
+        metavar = "SPELLING",
+        help = "Symbol spelling")
+    s.set_defaults (fun = findDefinitionBySpelling)
 
 
     s = subparsers.add_parser (

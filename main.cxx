@@ -163,6 +163,35 @@ private:
 };
 
 
+class FindBySpellingCommand : public Request::CommandParser {
+public:
+  FindBySpellingCommand (const std::string & name, Application & application)
+    : Request::CommandParser (name, "Find the definition by providing spelling"),
+      application_ (application)
+  {
+    prompt_ = "find-spelling> ";
+    defaults ();
+
+    using Request::key;
+    add (key ("spelling", args_.spelling)
+         ->metavar ("SPELLING")
+         ->description ("Symbol spelling"));
+  }
+
+  void defaults () {
+    args_.spelling = "";
+  }
+
+  void run (std::ostream & cout) {
+    application_.findDefinitionBySpelling (args_, cout);
+  }
+
+private:
+  Application & application_;
+  Application::FindDefinitionBySpellingArgs args_;
+};
+
+
 class GrepCommand : public Request::CommandParser {
 public:
   GrepCommand (const std::string & name, Application & application)
@@ -285,6 +314,7 @@ int main (int argc, char **argv) {
     .add (new IndexCommand ("index", app))
     .add (new UpdateCommand ("update", app))
     .add (new FindCommand ("find", app))
+    .add (new FindBySpellingCommand ("find-spelling", app))
     .add (new GrepCommand ("grep", app))
     .add (new CompleteCommand ("complete", app))
     .add (new ExitCommand ("exit"))

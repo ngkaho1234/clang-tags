@@ -45,6 +45,18 @@ void outputRefDef (const Storage::RefDef & refDef, std::ostream & cout)
   cout << writer.write (json);
 }
 
+void outputDef (const Storage::Definition & def, std::ostream & cout)
+{
+  Json::FastWriter writer;
+  Json::Value json;
+  json["def"] = def.json();
+
+  SourceFile sourceFile (def.file);
+  json["def"]["substring"] = sourceFile.substring (def.offset1, def.offset2);
+
+  cout << writer.write (json);
+}
+
 void displayCursor (LibClang::Cursor cursor, std::ostream & cout)
 {
   const LibClang::SourceLocation location (cursor.location());
@@ -78,6 +90,8 @@ void displayCursor (LibClang::Cursor cursor, std::ostream & cout)
     def.line2 = end.line;
     def.col1 = begin.column;
     def.col2 = end.column;
+    def.offset1 = begin.offset;
+    def.offset2 = end.offset;
     def.kind = cursorDef.kindStr();
     def.spelling = cursorDef.spelling();
     def.usr = cursorDef.USR();
@@ -168,5 +182,14 @@ void Application::findDefinition (FindDefinitionArgs & args, std::ostream & cout
   else {
     // Parse the source file and analyse it
     findDefinitionFromSource_ (args, cout);
+  }
+}
+
+void Application::findDefinitionBySpelling (FindDefinitionBySpellingArgs & args, std::ostream & cout) {
+  const auto defs = storage_.findDefinitionBySpelling (args.spelling);
+  auto def = defs.begin();
+  const auto end = defs.end();
+  for ( ; def != end ; ++def ) {
+    outputDef (*def, cout);
   }
 }

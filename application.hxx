@@ -48,6 +48,10 @@ public:
     bool        fromIndex;
   };
   void findDefinition (FindDefinitionArgs & args, std::ostream & cout);
+  struct FindDefinitionBySpellingArgs {
+    std::string spelling;
+  };
+  void findDefinitionBySpelling (FindDefinitionBySpellingArgs & args, std::ostream & cout);
 
 
   struct GrepArgs {

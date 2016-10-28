@@ -47,7 +47,9 @@ public:
                  "  value  TEXT"
                  ")");
     db_.execute ("CREATE INDEX IF NOT EXISTS idx_tags_spelling ON tags ("
-                 "  spelling"
+                 "  spelling,"
+                 "  isDecl,"
+                 "  isDefn"
                  ")");
     db_.execute ("CREATE INDEX IF NOT EXISTS idx_tags_usr ON tags ("
                  "  usr,"
@@ -286,6 +288,8 @@ public:
     int line2;
     int col1;
     int col2;
+    int offset1;
+    int offset2;
     std::string kind;
     std::string spelling;
 
@@ -297,6 +301,8 @@ public:
       json["line2"]    = line2;
       json["col1"]     = col1;
       json["col2"]     = col2;
+      json["offset1"]  = offset1;
+      json["offset2"]  = offset2;
       json["kind"]     = kind;
       json["spelling"] = spelling;
       return json;
@@ -321,6 +327,7 @@ public:
     Sqlite::Statement stmt =
       db_.prepare ("SELECT ref.offset1, ref.offset2, ref.kind, ref.spelling,"
                    "       def.usr, defFile.name,"
+                   "       def.offset1, def.offset2,"
                    "       def.line1, def.line2, def.col1, def.col2, "
                    "       def.kind, def.spelling "
                    "FROM tags AS ref "
@@ -344,10 +351,37 @@ public:
 
       stmt >> ref.offset1 >> ref.offset2 >> ref.kind >> ref.spelling
            >> def.usr >> def.file
+           >> def.offset1 >> def.offset2
            >> def.line1 >> def.line2 >> def.col1 >> def.col2
            >> def.kind >> def.spelling;
       ref.file = fileName;
       ret.push_back(refDef);
+    }
+    return ret;
+  }
+
+  std::vector<Definition> findDefinitionBySpelling (const std::string spelling) {
+    Sqlite::Statement stmt =
+      db_.prepare ("SELECT def.usr, defFile.name,"
+                   "       def.offset1, def.offset2,"
+                   "       def.line1, def.line2, def.col1, def.col2, "
+                   "       def.kind, def.spelling "
+                   "FROM tags AS def "
+                   "INNER JOIN files AS defFile ON def.fileId = defFile.id "
+                   "WHERE def.isDecl = 1 "
+                   "  AND def.isDefn = 1 "
+                   "  AND def.spelling >= ? ")
+      .bind (spelling);
+
+    std::vector<Definition> ret;
+    while (stmt.step() == SQLITE_ROW) {
+      Definition def;
+
+      stmt >> def.usr >> def.file
+           >> def.offset1 >> def.offset2
+           >> def.line1 >> def.line2 >> def.col1 >> def.col2
+           >> def.kind >> def.spelling;
+      ret.push_back(def);
     }
     return ret;
   }
